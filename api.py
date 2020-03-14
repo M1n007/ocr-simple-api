@@ -45,24 +45,19 @@ def healthCheck():
     result = jsonify({'message': 'Your application running properly'})
     return result
 
-@app.route('/api/ocr/images/v1', methods=['GET', 'POST'])
+@app.route('/api/ocr/images/v1', methods=['POST'])
 def ocr():
-    if request.method == 'POST':
-        files = request.files['file']
-        print(files)
-        if files and allowed_file(files.filename):
-            filename = secure_filename(files.filename)
-            files.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            path="./uploads/{}".format(filename)
-            print(filename)
-            print(path)
-            rec_string = process_image(path=path)
-            os.remove(path)
-            return jsonify(rec_string)
-        else:
-            result = jsonify({'err': True, 'message': 'type file not allowed!', 'data':''})
-            return result, 403
+    print(request)
+    files = request.files['file']
+    if files and allowed_file(files.filename):
+        filename = secure_filename(files.filename)
+        files.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        path="./uploads/{}".format(filename)
+        rec_string = process_image(path=path)
+        os.remove(path)
+        return jsonify(rec_string)
     else:
-        return jsonify({'err': True, 'message': 'internal server error', 'data':''}),500
+        result = jsonify({'err': True, 'message': 'type file not allowed!', 'data':''})
+        return result, 403
 
 app.run(host='0.0.0.0', port=9001)
