@@ -1,5 +1,4 @@
-from flask import Flask, request, jsonify, session
-from datetime import timedelta
+from flask import Flask, request, jsonify
 from process_image import process_image
 from werkzeug.utils import secure_filename
 import os
@@ -11,8 +10,6 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 app = Flask('__name__')
 app.config['DEBUG'] = True
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['SECRET_KEY'] = 'ocrarchv'
-app.config['PERMANENT_SESSION_LIFETIME'] =  timedelta(minutes=5)
 
 _VERSION = 1 #version 1
 
@@ -50,7 +47,6 @@ def healthCheck():
 
 @app.route('/api/ocr/images/v1', methods=['POST'])
 def ocr():
-    session.permanent = True
     files = request.files['file']
     if files and allowed_file(files.filename):
         filename = secure_filename(files.filename)
