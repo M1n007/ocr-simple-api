@@ -49,10 +49,13 @@ def healthCheck():
 def ocr():
     if request.method == 'POST':
         files = request.files['file']
+        print(files)
         if files and allowed_file(files.filename):
             filename = secure_filename(files.filename)
             files.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             path="./uploads/{}".format(filename)
+            print(filename)
+            print(path)
             rec_string = process_image(path=path)
             os.remove(path)
             return jsonify(rec_string)
