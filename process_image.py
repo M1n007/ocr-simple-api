@@ -1,7 +1,5 @@
 from cv2 import cv2
 import pytesseract
-import numpy as np
-
 
 # get grayscale image
 def get_grayscale(image):
@@ -19,7 +17,5 @@ def process_image(path=None):
         gray = get_grayscale(img)
         threshs = thresholding(gray)
         custom_config = r'--psm 6'
-        cv2.imwrite('./test.jpg', threshs)
         result = pytesseract.image_to_string(threshs, config=custom_config)
-        print(result)
         return {'err': False, 'message':'successfully recognized image', 'data': result}
