@@ -59,4 +59,4 @@ def ocr():
         result = jsonify({'err': True, 'message': 'type file not allowed!', 'data':''})
         return result, 403
 
-app.run(host='0.0.0.0', port=9001)
+app.run(host='0.0.0.0', port=3000)
