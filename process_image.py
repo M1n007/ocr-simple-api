@@ -4,7 +4,7 @@ import pytesseract
 import re
 from pytesseract import Output
 import spacy
-from base64 import b64encode
+from base64 import b64encode, b64decode
 from json import dumps
 import numpy as np
 import en_core_web_sm
@@ -42,6 +42,18 @@ def process_image(path=None,keyword=None):
         resultOcr = pytesseract.image_to_string(threshs, output_type=Output.DICT)
         d = pytesseract.image_to_data(img, output_type=Output.DICT)
 
+        # # Create rectangular structuring element and dilate
+        # dilate = cv2.dilate(threshs, None, iterations=15)
+        
+        # # Find contours and draw rectangle
+        # cnts = cv2.findContours(dilate, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        # cnts = cnts[0] if len(cnts) == 2 else cnts[1]
+        # for c in cnts:
+        #     x,y,w,h = cv2.boundingRect(c)
+        #     print(x,y,w,h)
+        #     img1 = cv2.rectangle(threshs, (x,y),(x+w,y+h), (36,255,12), 2)
+        #     cv2.imwrite('image.png', img1)
+
         # phrases = ['masalah korupsi']
         # patterns = [nlp(text) for text in phrases]
         # phrase_matcher.add('AI', None, *patterns)
@@ -65,8 +77,9 @@ def process_image(path=None,keyword=None):
                     _, buffer = cv2.imencode('.png', image_new)
                     png_as_text = b64encode(buffer)
                     base64_bytes = b64encode(png_as_text)
-                    base64_string = base64_bytes.decode('utf-8')
-                    result['imageResult'] = base64_string
+                    base64_string_last_result = b64decode(base64_bytes)
+                    last_result = base64_string_last_result.decode('utf-8')
+                    result['imageResult'] = last_result
 
 
         if not result['imageResult']:
