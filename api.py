@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from process_image import process_image
+from repository.process_image import process_image
 from werkzeug.utils import secure_filename
 import os
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -49,11 +49,12 @@ def healthCheck():
 def ocr():
     files = request.files['file']
     keywords = request.form.get('keyword')
+    score = request.form.get('score')
     if files and allowed_file(files.filename):
         filename = secure_filename(files.filename)
         files.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         path="./uploads/{}".format(filename)
-        rec_string,code = process_image(path=path,keyword=keywords)
+        rec_string,code = process_image(path=path,keyword=keywords, score=score)
         os.remove(path)
         return jsonify(rec_string),code
     else:

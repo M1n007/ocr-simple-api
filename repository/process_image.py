@@ -3,15 +3,15 @@ from flask import Flask, request, jsonify
 import pytesseract
 import re
 from pytesseract import Output
-import spacy
 from base64 import b64encode, b64decode
 from json import dumps
-import numpy as np
-from spacy.matcher import PhraseMatcher
+import nltk
+from nltk.tokenize import word_tokenize
+import difflib
 
-# import en_core_web_sm
-# nlp = en_core_web_sm.load()
-# phrase_matcher = PhraseMatcher(nlp.vocab)
+
+sm = difflib.SequenceMatcher(None)
+
 
 # get grayscale image
 def get_grayscale(image):
@@ -21,19 +21,29 @@ def get_grayscale(image):
 def thresholding(image):
     return cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
 
-def process_image(path=None,keyword=None):
+def process_image(path=None,keyword=None,score=None):
+    score_data = 0
+
+    if score == None:
+        score_data = 0.1
+    else:
+        score_data = score
+    
     if path == None:
        result = {'err': True, 'message': 'Path Can`t be empty', 'data':False}
        code = 403
        return result,code
 
     if keyword == None:
-        result = {'err': True, 'message': 'keyword field reuired', 'data':False}
+        result = {'err': True, 'message': 'keyword field required', 'data':False}
         code = 403
 
         return result,code
 
+    
+
     else:
+        
         img = cv2.imread(path)
         overlay = img.copy()
 
@@ -43,29 +53,21 @@ def process_image(path=None,keyword=None):
         resultOcr = pytesseract.image_to_string(threshs, output_type=Output.DICT)
         d = pytesseract.image_to_data(img, output_type=Output.DICT)
 
-        # # Create rectangular structuring element and dilate
-        # dilate = cv2.dilate(threshs, None, iterations=15)
+        text_ocr_result = resultOcr['text']
+        formatted_ocr_result = re.sub('[^a-zA-Z]', ' ', text_ocr_result)
+        formatted_ocr_result = re.sub(r'\s+', ' ', formatted_ocr_result)
 
-        # # Find contours and draw rectangle
-        # cnts = cv2.findContours(dilate, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        # cnts = cnts[0] if len(cnts) == 2 else cnts[1]
-        # for c in cnts:
-        #     x,y,w,h = cv2.boundingRect(c)
-        #     print(x,y,w,h)
-        #     img1 = cv2.rectangle(threshs, (x,y),(x+w,y+h), (36,255,12), 2)
-        #     cv2.imwrite('image.png', img1)
+        sm.set_seq2(keyword.lower())
 
-        # phrases = ['masalah korupsi']
-        # patterns = [nlp(text) for text in phrases]
-        # phrase_matcher.add('AI', None, *patterns)
-        # sentence = nlp (result['text'].lower())
-        # matched_phrases = phrase_matcher(sentence)
-        # for match_id, start, end in matched_phrases:
-        #     string_id = nlp.vocab.strings[match_id]
-        #     span = sentence[start:end]
-        #     print(match_id, string_id, start, end, span.text)
+        lasResultSimiliarity = []
 
-        result = {'text': resultOcr['text'], 'imageResult': ''}
+        for x in word_tokenize(formatted_ocr_result):
+            sm.set_seq1(x.lower())
+            if sm.ratio() >= float(score_data):
+                lasResultSimiliarity.append({x.lower():sm.ratio()})
+
+
+        result = {'text': resultOcr['text'], 'match_result': lasResultSimiliarity, 'image_result': ''}
 
         all_word_length = len(d['text'])
         for i in range(all_word_length):
@@ -80,10 +82,10 @@ def process_image(path=None,keyword=None):
                     base64_bytes = b64encode(png_as_text)
                     base64_string_last_result = b64decode(base64_bytes)
                     last_result = base64_string_last_result.decode('utf-8')
-                    result['imageResult'] = last_result
+                    result['image_result'] = last_result
 
 
-        if not result['imageResult']:
+        if not result['image_result']:
             result = {'err': True, 'message':'keyword '+keyword+' no match!', 'data': False}
             code = 404
             return result,code
@@ -91,4 +93,3 @@ def process_image(path=None,keyword=None):
             result = {'err': False, 'message':'successfully recognized image', 'data': result}
             code = 200
             return result,code
-
