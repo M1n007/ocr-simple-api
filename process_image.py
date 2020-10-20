@@ -7,10 +7,11 @@ import spacy
 from base64 import b64encode, b64decode
 from json import dumps
 import numpy as np
-import en_core_web_sm
-nlp = en_core_web_sm.load()
 from spacy.matcher import PhraseMatcher
-phrase_matcher = PhraseMatcher(nlp.vocab)
+
+# import en_core_web_sm
+# nlp = en_core_web_sm.load()
+# phrase_matcher = PhraseMatcher(nlp.vocab)
 
 # get grayscale image
 def get_grayscale(image):
@@ -44,7 +45,7 @@ def process_image(path=None,keyword=None):
 
         # # Create rectangular structuring element and dilate
         # dilate = cv2.dilate(threshs, None, iterations=15)
-        
+
         # # Find contours and draw rectangle
         # cnts = cv2.findContours(dilate, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         # cnts = cnts[0] if len(cnts) == 2 else cnts[1]
@@ -60,8 +61,8 @@ def process_image(path=None,keyword=None):
         # sentence = nlp (result['text'].lower())
         # matched_phrases = phrase_matcher(sentence)
         # for match_id, start, end in matched_phrases:
-        #     string_id = nlp.vocab.strings[match_id]  
-        #     span = sentence[start:end]   
+        #     string_id = nlp.vocab.strings[match_id]
+        #     span = sentence[start:end]
         #     print(match_id, string_id, start, end, span.text)
 
         result = {'text': resultOcr['text'], 'imageResult': ''}
@@ -90,3 +91,4 @@ def process_image(path=None,keyword=None):
             result = {'err': False, 'message':'successfully recognized image', 'data': result}
             code = 200
             return result,code
+
