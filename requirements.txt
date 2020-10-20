@@ -1,5 +1,8 @@
 flask
-opencv-python
 pytesseract
 gevent
 numpy
+pillow
+opencv-contrib-python-headless
+spacy
+
