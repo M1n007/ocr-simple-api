@@ -6,6 +6,7 @@ from pytesseract import Output
 from base64 import b64encode, b64decode
 from json import dumps
 import nltk
+nltk.download('punkt') ## one execution
 from nltk.tokenize import word_tokenize
 import difflib
 

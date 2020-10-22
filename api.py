@@ -2,14 +2,17 @@ from flask import Flask, request, jsonify
 from repository.process_image import process_image
 from werkzeug.utils import secure_filename
 import os
+from os.path import join, dirname, realpath
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-UPLOAD_FOLDER = './uploads'
+UPLOAD_FOLDER = join(dirname(realpath(__file__)), 'uploads/')
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
 app = Flask('__name__')
 app.config['DEBUG'] = True
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 
 _VERSION = 1 #version 1
 
@@ -52,7 +55,7 @@ def ocr():
     score = request.form.get('score')
     if files and allowed_file(files.filename):
         filename = secure_filename(files.filename)
-        files.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        files.save(join(basedir, app.config['UPLOAD_FOLDER'], filename))
         path="./uploads/{}".format(filename)
         rec_string,code = process_image(path=path,keyword=keywords, score=score)
         os.remove(path)
